@@ -45,6 +45,8 @@ CREATE TABLE posts (
   id         VARCHAR(30)  NOT NULL,
   title      VARCHAR(255) NOT NULL,
   content    LONGTEXT     NOT NULL,
+  view_count INT          NOT NULL DEFAULT 0,
+  score      INT          NOT NULL DEFAULT 0,
   user_id    VARCHAR(30)  NOT NULL,
   deleted_at DATETIME(3)  NULL,
   created_at DATETIME(3)  NOT NULL DEFAULT CURRENT_TIMESTAMP(3),

@@ -175,4 +175,3 @@ INSERT INTO votes (id, value, user_id, post_id, comment_id) VALUES
 
 
 
-// Mọi người nhớ git pull về xong phải chạy cái này để thêm db   yarn prisma generate
