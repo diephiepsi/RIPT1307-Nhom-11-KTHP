@@ -1,5 +1,6 @@
 import {
   App,
+
   Card,
   Input,
   Select,
@@ -14,15 +15,20 @@ import { Link, useNavigate } from "react-router-dom";
 import type { QuestionListItem, Tag } from "../../models/qa";
 import { questionsService } from "../../services/questions";
 
+
 export function QuestionsPage() {
   const { message } = App.useApp();
+  const nav = useNavigate();
+
   const [loading, setLoading] = useState(false);
   const [rows, setRows] = useState<QuestionListItem[]>([]);
   const [tags, setTags] = useState<Tag[]>([]);
+
   const [q, setQ] = useState("");
   const [tag, setTag] = useState<string | undefined>(undefined);
   const [sort, setSort] = useState("recent");
   const nav = useNavigate();
+
 
   useEffect(() => {
     questionsService
@@ -31,10 +37,11 @@ export function QuestionsPage() {
       .catch(() => void 0);
   }, []);
 
+
   const load = async () => {
     setLoading(true);
     try {
-      // Ép kiểu as any để tránh lỗi TypeScript nếu trong service chưa định nghĩa thuộc tính sort
+
       const data = await questionsService.list({
         q: q || undefined,
         tag,
@@ -49,9 +56,12 @@ export function QuestionsPage() {
   };
 
   useEffect(() => {
-    void load();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [tag, sort]); // Gọi lại API mỗi khi thẻ tag hoặc tiêu chí sắp xếp thay đổi
+    const timer = window.setTimeout(() => void load(), 250);
+    return () => window.clearTimeout(timer);
+
+
+
+  }, [tag, sort]); 
 
   return (
     <div style={{ display: "flex", gap: "24px", fontFamily: "sans-serif" }}>
@@ -100,9 +110,13 @@ export function QuestionsPage() {
               placeholder="Filter by keyword..."
               value={q}
               onChange={(e) => setQ(e.target.value)}
-              onSearch={() => void load()}
-              style={{ width: 280 }}
-              allowClear
+              placeholder="Tìm React, MySQL, thuật toán..."
+              style={{
+                height: 48,
+                borderRadius: 16,
+                border: "none",
+                boxShadow: "0 10px 28px rgba(0,0,0,0.12)",
+              }}
             />
             <Select
               allowClear
@@ -132,9 +146,9 @@ export function QuestionsPage() {
             >
               {rows.length} questions found
             </span>
-          </Space>
-        </Card>
 
+          </Space>
+        </section>
         {/* VÙNG CHỨA DANH SÁCH ITEMS (THAY THẾ CHO TABLE) */}
         <Spin spinning={loading}>
           <div style={{ borderTop: "1px solid #e3e6e8" }}>
@@ -306,6 +320,7 @@ export function QuestionsPage() {
               Why standard tables are moving back to inline row feeds
             </li>
           </ul>
+
         </div>
       </div>
     </div>

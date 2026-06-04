@@ -2,13 +2,10 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.notificationRoutes = void 0;
 const express_1 = require("express");
-const zod_1 = require("zod");
-const db_1 = require("../utils/db"); // Trỏ đúng utils/db giống cấu trúc dist của bạn
+const db_1 = require("../db");
 const auth_1 = require("../middlewares/auth");
-
+const zod_1 = require("zod");
 const router = (0, express_1.Router)();
-
-// Định nghĩa schema Zod để kiểm tra dữ liệu đầu ra
 const notificationResponseSchema = zod_1.z.object({
     id: zod_1.z.string(),
     recipientId: zod_1.z.string(),
@@ -20,8 +17,6 @@ const notificationResponseSchema = zod_1.z.object({
     createdAt: zod_1.z.date(),
 });
 const notificationListResponseSchema = zod_1.z.array(notificationResponseSchema);
-
-// [GET] /notifications
 router.get('/', auth_1.authRequired, async (req, res) => {
     try {
         const userId = req.user.id;
@@ -40,8 +35,6 @@ router.get('/', auth_1.authRequired, async (req, res) => {
         res.status(500).json({ message: 'Lỗi server khi lấy thông báo' });
     }
 });
-
-// [POST] /notifications/read-all
 router.post('/read-all', auth_1.authRequired, async (req, res) => {
     try {
         const userId = req.user.id;
@@ -52,8 +45,7 @@ router.post('/read-all', auth_1.authRequired, async (req, res) => {
         res.json({ success: true });
     }
     catch (error) {
-        res.status(500).json({ message: 'Lỗi server khi cập nhật trạng thái đã đọc' });
+        res.status(500).json({ message: 'Lỗi server' });
     }
 });
-
 exports.notificationRoutes = router;
