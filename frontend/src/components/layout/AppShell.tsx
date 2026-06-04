@@ -4,6 +4,8 @@ import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { logout } from '../../store/authSlice';
 import { useState, useEffect } from 'react';
+import { api } from '../../services/api';
+import { storage } from '../../services/storage';
 
 const { Header, Content, Sider } = Layout;
 
@@ -44,19 +46,12 @@ export function AppShell() {
     if (!user) return;
 
     const fetchNotifications = async () => {
-      const token = localStorage.getItem('token'); 
+      const token = storage.getToken();
       if (!token) return; // Nếu đã logout hoặc mất token, chặn gọi API ngầm để tránh lỗi 401 Unauthorized
 
       try {
-        const res = await fetch('/notifications', {
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        });
-        if (res.ok) {
-          const data = await res.json();
-          setNotifications(data);
-        }
+        const { data } = await api.get<NotificationItem[]>('/notifications');
+        setNotifications(data);
       } catch (error) {
         console.error('Lỗi khi tải thông báo:', error);
       }
@@ -71,18 +66,11 @@ export function AppShell() {
 
   const markAllAsRead = async () => {
     try {
-      const token = localStorage.getItem('token');
+      const token = storage.getToken();
       if (!token) return;
 
-      const res = await fetch('/notifications/read-all', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-      if (res.ok) {
-        setNotifications(notifications.map(n => ({ ...n, isRead: true })));
-      }
+      await api.post('/notifications/read-all');
+      setNotifications(notifications.map(n => ({ ...n, isRead: true })));
     } catch (error) {
       console.error('Lỗi khi cập nhật trạng thái đã đọc:', error);
     }
@@ -189,11 +177,6 @@ export function AppShell() {
           >
             UniBrain<span style={{ fontWeight: 300, color: '#f48225' }}>.com</span>
           </Typography.Title>
-
-          <Input 
-            placeholder="Search missing concepts, tags, errors..." 
-            style={{ width: '50vw', maxWidth: '600px', borderRadius: '3px' }}
-          />
         </Space>
 
         <Space size="middle">

@@ -76,9 +76,6 @@ export function LoginPage() {
             label={
               <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', alignItems: 'center' }}>
                 <span style={{ fontWeight: 600, color: '#0c0d0e', fontSize: '0.9rem' }}>Password</span>
-                <span style={{ color: '#0074cc', fontSize: '0.75rem', cursor: 'pointer', fontWeight: 400 }}>
-                  Forgot password?
-                </span>
               </div>
             }
             rules={[{ required: true, message: 'Vui lòng nhập mật khẩu' }]}

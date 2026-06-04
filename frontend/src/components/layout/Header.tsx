@@ -7,11 +7,9 @@ export const Header: React.FC = () => {
     <header className="so-header">
       <div className="header-container">
         <div className="logo">
-          stack<span className="logo-thin">overflow</span>
+          UniBrain<span className="logo-thin">.com</span>
         </div>
-        <div className="search-bar">
-          <input type="text" placeholder="Search missing concepts, errors..." />
-        </div>
+        
         <div className="auth-buttons">
           <button className="btn-login">Log in</button>
           <button className="btn-signup">Sign up</button>

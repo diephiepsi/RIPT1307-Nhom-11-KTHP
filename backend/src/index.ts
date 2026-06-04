@@ -15,7 +15,6 @@ import { notificationRoutes } from './routes/notifications';
 
 const app = express();
 
-app.use('/api/notifications', notificationRoutes);
 app.use(helmet());
 app.use(cors({ origin: true, credentials: true }));
 app.use(express.json({ limit: '2mb' }));

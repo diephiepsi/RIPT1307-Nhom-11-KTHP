@@ -31,9 +31,12 @@ router.post('/:id/vote', authRequired, async (req, res) => {
 
       try {
         if (value === 1 && c.authorId !== req.user!.id) {
-          // Ép kiểu or fallback linh hoạt phòng trường hợp JwtUser khai báo thiếu trường ở các file gõ khác nhau
-          const u = req.user as any;
-          const senderName = u?.full_name || u?.fullName || u?.email || 'Một thành viên';
+          // JWT không chứa tên người dùng → lấy tên thật từ DB để hiển thị thông báo
+          const sender = await prisma.user.findUnique({
+            where: { id: req.user!.id },
+            select: { fullName: true },
+          });
+          const senderName = sender?.fullName ?? 'Một thành viên';
 
           await prisma.notification.create({
             data: {
@@ -87,8 +90,11 @@ router.post('/', authRequired, async (req, res) => {
         where: { id: postId, deletedAt: null }
       });
       if (question && question.authorId !== req.user!.id) {
-        const u = req.user as any;
-        const senderName = u?.full_name || u?.fullName || u?.email || 'Một thành viên';
+        const sender = await prisma.user.findUnique({
+          where: { id: req.user!.id },
+          select: { fullName: true },
+        });
+        const senderName = sender?.fullName ?? 'Một thành viên';
 
         await prisma.notification.create({
           data: {
