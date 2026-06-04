@@ -8,12 +8,14 @@ const auth_1 = require("../middlewares/auth");
 const voting_1 = require("../utils/voting");
 const mail_1 = require("../services/mail");
 const router = (0, express_1.Router)();
+// Lấy danh sách bài viết (Public Feed - Chỉ lấy bài ĐÃ DUYỆT)
 router.get('/', auth_1.authOptional, async (req, res) => {
     const q = typeof req.query.q === 'string' ? req.query.q : undefined;
     const tag = typeof req.query.tag === 'string' ? req.query.tag : undefined;
     const questions = await db_1.prisma.question.findMany({
         where: {
             deletedAt: null,
+            isApproved: true, // THÊM DÒNG NÀY: Chỉ lấy những bài đã được Admin duyệt
             ...(q
                 ? {
                     OR: [{ title: { contains: q } }, { content: { contains: q } }],
@@ -43,6 +45,7 @@ router.get('/', auth_1.authOptional, async (req, res) => {
         answersCount: x._count.comments,
     })));
 });
+// Xem chi tiết bài viết
 router.get('/:id', auth_1.authOptional, async (req, res) => {
     const id = String(req.params.id);
     const q = await db_1.prisma.question.findFirst({
@@ -66,7 +69,14 @@ router.get('/:id', auth_1.authOptional, async (req, res) => {
         },
     });
     if (!q)
-        return res.status(404).json({ message: 'Not found' });
+        return res.status(404).json({ message: 'Không tìm thấy bài viết' });
+    // THÊM LOGIC KIỂM TRA DUYỆT BÀI: 
+    // Nếu bài chưa duyệt, chỉ Admin hoặc Tác giả của bài viết mới được xem chi tiết
+    if (!q.isApproved) {
+        if (!req.user || (req.user.role !== 'ADMIN' && req.user.id !== q.authorId)) {
+            return res.status(403).json({ message: 'Bài viết này đang chờ Quản trị viên duyệt.' });
+        }
+    }
     res.json({
         id: q.id,
         title: q.title,
@@ -90,6 +100,7 @@ const createSchema = zod_1.z.object({
     content: zod_1.z.string().min(20),
     tags: zod_1.z.array(zod_1.z.string().min(1)).min(1),
 });
+// Đăng bài mới
 router.post('/', auth_1.authRequired, async (req, res) => {
     const parsed = createSchema.safeParse(req.body);
     if (!parsed.success)
@@ -101,6 +112,7 @@ router.post('/', auth_1.authRequired, async (req, res) => {
                 title,
                 content,
                 authorId: req.user.id,
+                // isApproved tự động bằng false theo Schema Prisma
             },
         });
         for (const tagName of tags) {
@@ -113,15 +125,15 @@ router.post('/', auth_1.authRequired, async (req, res) => {
         }
         return q;
     });
-    // notify admins/lecturers (simple demo: send to all lecturers + admins)
+    // Gửi thông báo đến Admin: Sửa lại nội dung mail báo là cần duyệt
     const recipients = await db_1.prisma.user.findMany({
-        where: { role: { in: ['ADMIN', 'LECTURER'] }, locked: false },
+        where: { role: 'ADMIN', locked: false }, // Đổi thành chỉ gửi cho Admin vì cần duyệt bài
         select: { email: true },
     });
     await Promise.allSettled(recipients.map((u) => (0, mail_1.sendMail)({
         to: u.email,
-        subject: 'Có bài đăng mới trên diễn đàn',
-        html: `<p><b>${title}</b></p><p>Vừa có bài đăng mới. Vào hệ thống để xem chi tiết.</p>`,
+        subject: 'Yêu cầu duyệt bài đăng mới trên diễn đàn',
+        html: `<p><b>${title}</b></p><p>Vừa có một bài đăng mới đang chờ bạn duyệt. Vào hệ thống Admin để kiểm tra và duyệt bài.</p>`,
     })));
     const detail = await db_1.prisma.question.findFirst({
         where: { id: created.id },
@@ -144,6 +156,7 @@ const addCommentSchema = zod_1.z.object({
     content: zod_1.z.string().min(1),
     parentId: zod_1.z.string().optional(),
 });
+// Bình luận
 router.post('/:id/comments', auth_1.authRequired, async (req, res) => {
     const parsed = addCommentSchema.safeParse(req.body);
     if (!parsed.success)
@@ -170,7 +183,6 @@ router.post('/:id/comments', auth_1.authRequired, async (req, res) => {
             parentId: parsed.data.parentId ?? null,
         },
     });
-    // notify question author
     await (0, mail_1.sendMail)({
         to: q.author.email,
         subject: 'Có người trả lời bình luận/câu hỏi của bạn',
@@ -178,6 +190,7 @@ router.post('/:id/comments', auth_1.authRequired, async (req, res) => {
     });
     res.status(201).json({ id: c.id });
 });
+// Vote
 router.post('/:id/vote', auth_1.authRequired, async (req, res) => {
     const schema = zod_1.z.object({ value: zod_1.z.union([zod_1.z.literal(-1), zod_1.z.literal(0), zod_1.z.literal(1)]) });
     const parsed = schema.safeParse(req.body);

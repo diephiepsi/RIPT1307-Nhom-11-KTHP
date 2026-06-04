@@ -32,7 +32,7 @@ router.post('/register', async (req, res) => {
     const { email, password, fullName, role } = parsed.data;
     const exists = await db_1.prisma.user.findUnique({ where: { email } });
     if (exists)
-        return res.status(409).json({ message: 'Email already exists' });
+        return res.status(409).json({ message: 'Email này đã được sử dụng' });
     const hashed = await bcryptjs_1.default.hash(password, 10);
     const user = await db_1.prisma.user.create({
         data: { email, password: hashed, fullName, role },
@@ -48,12 +48,13 @@ router.post('/login', async (req, res) => {
     const { email, password } = parsed.data;
     const user = await db_1.prisma.user.findUnique({ where: { email } });
     if (!user)
-        return res.status(401).json({ message: 'Invalid credentials' });
+        return res.status(401).json({ message: 'Tài khoản không tồn tại' });
+    // Kiểm tra khóa tài khoản lúc đăng nhập
     if (user.locked)
-        return res.status(403).json({ message: 'Account is locked' });
+        return res.status(403).json({ message: 'Tài khoản của bạn đã bị khóa bởi Quản trị viên' });
     const ok = await bcryptjs_1.default.compare(password, user.password);
     if (!ok)
-        return res.status(401).json({ message: 'Invalid credentials' });
+        return res.status(401).json({ message: 'Mật khẩu không chính xác' });
     const token = signToken({ id: user.id, role: user.role, email: user.email });
     res.json({
         token,
@@ -66,7 +67,10 @@ router.get('/me', auth_1.authRequired, async (req, res) => {
         select: { id: true, email: true, fullName: true, role: true, locked: true },
     });
     if (!user)
-        return res.status(404).json({ message: 'Not found' });
+        return res.status(404).json({ message: 'Không tìm thấy người dùng' });
+    // NÂNG CẤP: Chặn luôn truy cập nếu Token còn hạn nhưng tài khoản đã bị Admin khóa
+    if (user.locked)
+        return res.status(403).json({ message: 'Tài khoản của bạn đã bị khóa' });
     res.json(user);
 });
 exports.authRouter = router;
