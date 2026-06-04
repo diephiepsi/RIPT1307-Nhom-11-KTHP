@@ -179,6 +179,12 @@ INSERT INTO votes (id, value, user_id, post_id, comment_id) VALUES
 --   student@gmail.com / 123456  (STUDENT)
 --   teacher@gmail.com / 123456  (LECTURER)
 -- =========================
+
+
+
+
+// TẠo bảng mới này nhơ 
+
 CREATE TABLE notifications (
   id           VARCHAR(30)  NOT NULL,
   recipient_id VARCHAR(30)  NOT NULL, -- Người nhận thông báo (chủ bài viết)
