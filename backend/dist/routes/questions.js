@@ -1,128 +1,61 @@
-import { Router } from "express";
-import { z } from "zod";
-import type { Prisma } from "@prisma/client";
-
-import { prisma } from "../db";
-import { authOptional, authRequired } from "../middlewares/auth";
-import { summarizeVotes } from "../utils/voting";
-import { sendMail } from "../services/mail";
-
-const router = Router();
-
-function mapQuestionListItem(x: any, myUserId?: string) {
-  const votes = summarizeVotes(x.votes ?? [], myUserId);
-  const commentsCount = x._count?.comments ?? x.comments?.length ?? 0;
-  const viewsCount = x.viewsCount ?? 0;
-  const isBookmarked = Boolean(x.bookmarks?.length);
-  const hotScore =
-    votes.likesCount * 3 +
-    commentsCount * 2 +
-    viewsCount -
-    votes.dislikesCount * 2;
-
-  return {
-    id: x.id,
-    title: x.title,
-    createdAt: x.createdAt.toISOString(),
-    updatedAt: x.updatedAt?.toISOString?.() ?? undefined,
-    author: x.author,
-    tags: (x.tags ?? []).map((t: any) => t.tag),
-    votes,
-    likesCount: votes.likesCount,
-    dislikesCount: votes.dislikesCount,
-    answersCount: commentsCount,
-    commentsCount,
-    viewsCount,
-    isBookmarked,
-    hotScore,
-  };
-}
-
-function mapComment(c: any, myUserId?: string) {
-  const votes = summarizeVotes(c.votes ?? [], myUserId);
-  return {
-    id: c.id,
-    content: c.content,
-    parentId: c.parentId,
-    createdAt: c.createdAt.toISOString(),
-    author: c.author,
-    votes,
-    likesCount: votes.likesCount,
-    dislikesCount: votes.dislikesCount,
-  };
-}
-
-router.get("/", authOptional, async (req, res) => {
-  const q = typeof req.query.q === "string" ? req.query.q.trim() : undefined;
-  const tag =
-    typeof req.query.tag === "string" ? req.query.tag.trim() : undefined;
-  const sort = typeof req.query.sort === "string" ? req.query.sort : "newest";
-  const status =
-    typeof req.query.status === "string" ? req.query.status : "all";
-  const onlyBookmarked = req.query.bookmarked === "true";
-
-  const where: Prisma.QuestionWhereInput = {
-    deletedAt: null,
-    isApproved: true,
-    ...(q
-      ? {
-          OR: [{ title: { contains: q } }, { content: { contains: q } }],
-        }
-      : {}),
-    ...(tag
-      ? {
-          tags: { some: { tag: { name: tag } } },
-        }
-      : {}),
-    ...(onlyBookmarked && req.user?.id
-      ? {
-          bookmarks: { some: { userId: req.user.id } },
-        }
-      : {}),
-  };
-
-  const questions = await prisma.question.findMany({
-    where,
-    orderBy:
-      sort === "oldest"
-        ? { createdAt: "asc" }
-        : sort === "views"
-          ? { viewsCount: "desc" }
-          : { createdAt: "desc" },
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.questionsRouter = void 0;
+const express_1 = require("express");
+const zod_1 = require("zod");
+const db_1 = require("../db");
+const auth_1 = require("../middlewares/auth");
+const voting_1 = require("../utils/voting");
+const mail_1 = require("../services/mail");
+const router = (0, express_1.Router)();
+// Lấy danh sách bài viết (Public Feed - Chỉ lấy bài ĐÃ DUYỆT)
+router.get("/", auth_1.authOptional, async (req, res) => {
+  const q = typeof req.query.q === "string" ? req.query.q : undefined;
+  const tag = typeof req.query.tag === "string" ? req.query.tag : undefined;
+  const questions = await db_1.prisma.question.findMany({
+    where: {
+      deletedAt: null,
+      isApproved: true, // THÊM DÒNG NÀY: Chỉ lấy những bài đã được Admin duyệt
+      ...(q
+        ? {
+            OR: [{ title: { contains: q } }, { content: { contains: q } }],
+          }
+        : {}),
+      ...(tag
+        ? {
+            tags: { some: { tag: { name: tag } } },
+          }
+        : {}),
+    },
+    orderBy: { createdAt: "desc" },
     include: {
       author: { select: { id: true, fullName: true, role: true } },
       tags: { include: { tag: true } },
       votes: { select: { value: true, userId: true } },
-      bookmarks: req.user?.id
-        ? { where: { userId: req.user.id }, select: { id: true } }
-        : false,
-      _count: { select: { comments: { where: { deletedAt: null } } } },
+      _count: { select: { comments: true } },
     },
   });
-
-  let rows = questions.map((x) => mapQuestionListItem(x, req.user?.id));
-
-  if (status === "unanswered") rows = rows.filter((x) => x.answersCount === 0);
-  if (status === "answered") rows = rows.filter((x) => x.answersCount > 0);
-  if (sort === "likes") rows.sort((a, b) => b.likesCount - a.likesCount);
-  if (sort === "answers") rows.sort((a, b) => b.answersCount - a.answersCount);
-  if (sort === "hot") rows.sort((a, b) => b.hotScore - a.hotScore);
-
-  res.json(rows);
+  res.json(
+    questions.map((x) => ({
+      id: x.id,
+      title: x.title,
+      createdAt: x.createdAt.toISOString(),
+      author: x.author,
+      tags: x.tags.map((t) => t.tag),
+      votes: (0, voting_1.summarizeVotes)(x.votes, req.user?.id),
+      answersCount: x._count.comments,
+    })),
+  );
 });
-
-router.get("/:id", authOptional, async (req, res) => {
+// Xem chi tiết bài viết
+router.get("/:id", auth_1.authOptional, async (req, res) => {
   const id = String(req.params.id);
-
-  const q = await prisma.question.findFirst({
+  const q = await db_1.prisma.question.findFirst({
     where: { id, deletedAt: null },
     include: {
       author: { select: { id: true, fullName: true, role: true } },
       tags: { include: { tag: true } },
       votes: { select: { value: true, userId: true } },
-      bookmarks: req.user?.id
-        ? { where: { userId: req.user.id }, select: { id: true } }
-        : false,
       comments: {
         where: { deletedAt: null },
         orderBy: { createdAt: "asc" },
@@ -137,9 +70,9 @@ router.get("/:id", authOptional, async (req, res) => {
       },
     },
   });
-
   if (!q) return res.status(404).json({ message: "Không tìm thấy bài viết" });
-
+  // THÊM LOGIC KIỂM TRA DUYỆT BÀI:
+  // Nếu bài chưa duyệt, chỉ Admin hoặc Tác giả của bài viết mới được xem chi tiết
   if (!q.isApproved) {
     if (
       !req.user ||
@@ -150,211 +83,153 @@ router.get("/:id", authOptional, async (req, res) => {
         .json({ message: "Bài viết này đang chờ Quản trị viên duyệt." });
     }
   }
-
-  const votes = summarizeVotes(q.votes, req.user?.id);
-
   res.json({
     id: q.id,
     title: q.title,
     content: q.content,
     createdAt: q.createdAt.toISOString(),
-    updatedAt: q.updatedAt.toISOString(),
     author: q.author,
     tags: q.tags.map((t) => t.tag),
-    votes,
-    likesCount: votes.likesCount,
-    dislikesCount: votes.dislikesCount,
-    viewsCount: q.viewsCount ?? 0,
-    isBookmarked: Boolean((q as any).bookmarks?.length),
-    comments: q.comments.map((c) => mapComment(c, req.user?.id)),
+    votes: (0, voting_1.summarizeVotes)(q.votes, req.user?.id),
+    comments: q.comments.map((c) => ({
+      id: c.id,
+      content: c.content,
+      parentId: c.parentId,
+      createdAt: c.createdAt.toISOString(),
+      author: c.author,
+      votes: (0, voting_1.summarizeVotes)(c.votes, req.user?.id),
+    })),
   });
 });
-
-const createSchema = z.object({
-  title: z.string().min(10),
-  content: z.string().min(20),
-  tags: z.array(z.string().min(1)).min(1),
+const createSchema = zod_1.z.object({
+  title: zod_1.z.string().min(10),
+  content: zod_1.z.string().min(20),
+  tags: zod_1.z.array(zod_1.z.string().min(1)).min(1),
 });
-
-router.post("/", authRequired, async (req, res) => {
+// Đăng bài mới
+router.post("/", auth_1.authRequired, async (req, res) => {
   const parsed = createSchema.safeParse(req.body);
   if (!parsed.success) return res.status(400).json(parsed.error.flatten());
-
   const { title, content, tags } = parsed.data;
-
-  const created = await prisma.$transaction(
-    async (tx: Prisma.TransactionClient) => {
-      const q = await tx.question.create({
-        data: {
-          title,
-          content,
-          authorId: req.user!.id,
-        },
+  const created = await db_1.prisma.$transaction(async (tx) => {
+    const q = await tx.question.create({
+      data: {
+        title,
+        content,
+        authorId: req.user.id,
+        // isApproved tự động bằng false theo Schema Prisma
+      },
+    });
+    for (const tagName of tags) {
+      const t = await tx.tag.upsert({
+        where: { name: tagName },
+        update: {},
+        create: { name: tagName },
       });
-
-      for (const rawTagName of tags) {
-        const tagName = rawTagName.trim();
-        if (!tagName) continue;
-        const t = await tx.tag.upsert({
-          where: { name: tagName },
-          update: {},
-          create: { name: tagName },
-        });
-        await tx.questionTag.create({
-          data: { questionId: q.id, tagId: t.id },
-        });
-      }
-
-      return q;
-    },
-  );
-
-  const recipients = await prisma.user.findMany({
-    where: { role: "ADMIN", locked: false },
+      await tx.questionTag.create({ data: { questionId: q.id, tagId: t.id } });
+    }
+    return q;
+  });
+  // Gửi thông báo đến Admin: Sửa lại nội dung mail báo là cần duyệt
+  const recipients = await db_1.prisma.user.findMany({
+    where: { role: "ADMIN", locked: false }, // Đổi thành chỉ gửi cho Admin vì cần duyệt bài
     select: { email: true },
   });
-
   await Promise.allSettled(
     recipients.map((u) =>
-      sendMail({
+      (0, mail_1.sendMail)({
         to: u.email,
         subject: "Yêu cầu duyệt bài đăng mới trên diễn đàn",
-        html: `<p><b>${title}</b></p><p>Vừa có một bài đăng mới đang chờ bạn duyệt.</p>`,
+        html: `<p><b>${title}</b></p><p>Vừa có một bài đăng mới đang chờ bạn duyệt. Vào hệ thống Admin để kiểm tra và duyệt bài.</p>`,
       }),
     ),
   );
-
+  const detail = await db_1.prisma.question.findFirst({
+    where: { id: created.id },
+    include: {
+      author: { select: { id: true, fullName: true, role: true } },
+      tags: { include: { tag: true } },
+      votes: true,
+      comments: true,
+    },
+  });
+  if (!detail) return res.status(500).json({ message: "Create failed" });
   res.status(201).json({
-    id: created.id,
-    message: "Đăng câu hỏi thành công, đang chờ duyệt.",
+    id: detail.id,
+    title: detail.title,
+    content: detail.content,
+    createdAt: detail.createdAt.toISOString(),
+    author: detail.author,
+    tags: detail.tags.map((t) => t.tag),
+    votes: (0, voting_1.summarizeVotes)([], req.user?.id),
+    comments: [],
   });
 });
-
-const addCommentSchema = z.object({
-  content: z.string().min(1),
-  parentId: z.string().optional(),
+const addCommentSchema = zod_1.z.object({
+  content: zod_1.z.string().min(1),
+  parentId: zod_1.z.string().optional(),
 });
-
-router.post("/:id/comments", authRequired, async (req, res) => {
+// Bình luận
+router.post("/:id/comments", auth_1.authRequired, async (req, res) => {
   const parsed = addCommentSchema.safeParse(req.body);
   if (!parsed.success) return res.status(400).json(parsed.error.flatten());
-
   const questionId = String(req.params.id);
-
-  const q = await prisma.question.findFirst({
+  const q = await db_1.prisma.question.findFirst({
     where: { id: questionId, deletedAt: null },
     include: { author: { select: { email: true, fullName: true } } },
   });
-
-  if (!q) return res.status(404).json({ message: "Không tìm thấy câu hỏi" });
-
+  if (!q) return res.status(404).json({ message: "Not found" });
   if (parsed.data.parentId) {
-    const parent = await prisma.comment.findFirst({
-      where: {
-        id: parsed.data.parentId,
-        questionId,
-        deletedAt: null,
-      },
-      select: { id: true },
+    const parent = await db_1.prisma.comment.findFirst({
+      where: { id: parsed.data.parentId, questionId, deletedAt: null },
     });
-
-    if (!parent) {
-      return res.status(400).json({ message: "Không tìm thấy bình luận cha" });
-    }
+    if (!parent)
+      return res.status(400).json({ message: "Parent comment not found" });
   }
-
-  const c = await prisma.comment.create({
+  const c = await db_1.prisma.comment.create({
     data: {
       questionId,
-      authorId: req.user!.id,
+      authorId: req.user.id,
       content: parsed.data.content,
       parentId: parsed.data.parentId ?? null,
     },
-    include: {
-      author: { select: { id: true, fullName: true, role: true } },
-      votes: { select: { value: true, userId: true } },
-    },
   });
-
-  // Gửi mail chỉ là phụ, không được làm fail chức năng reply/comment.
-  void sendMail({
+  await (0, mail_1.sendMail)({
     to: q.author.email,
-    subject: "Có người trả lời câu hỏi của bạn",
-    html: `
-      <p>Chào ${q.author.fullName},</p>
-      <p>Có bình luận mới cho câu hỏi: <b>${q.title}</b></p>
-    `,
-  }).catch((err) => {
-    console.error("[mail] comment notification failed:", err?.message || err);
+    subject: "Có người trả lời bình luận/câu hỏi của bạn",
+    html: `<p>Chào ${q.author.fullName},</p><p>Có bình luận mới cho câu hỏi: <b>${q.title}</b></p>`,
   });
-
-  return res.status(201).json(mapComment(c, req.user?.id));
+  res.status(201).json({ id: c.id });
 });
-
-router.post("/:id/vote", authRequired, async (req, res) => {
-  const schema = z.object({
-    value: z.union([z.literal(-1), z.literal(0), z.literal(1)]),
+// Vote
+router.post("/:id/vote", auth_1.authRequired, async (req, res) => {
+  const schema = zod_1.z.object({
+    value: zod_1.z.union([
+      zod_1.z.literal(-1),
+      zod_1.z.literal(0),
+      zod_1.z.literal(1),
+    ]),
   });
   const parsed = schema.safeParse(req.body);
   if (!parsed.success) return res.status(400).json(parsed.error.flatten());
-
   const questionId = String(req.params.id);
-  const q = await prisma.question.findFirst({
+  const q = await db_1.prisma.question.findFirst({
     where: { id: questionId, deletedAt: null },
     select: { id: true },
   });
   if (!q) return res.status(404).json({ message: "Not found" });
-
   const value = parsed.data.value;
-
   if (value === 0) {
-    await prisma.vote.deleteMany({
-      where: { userId: req.user!.id, questionId },
+    await db_1.prisma.vote.deleteMany({
+      where: { userId: req.user.id, questionId },
     });
   } else {
-    await prisma.vote.upsert({
-      where: { userId_questionId: { userId: req.user!.id, questionId } },
+    await db_1.prisma.vote.upsert({
+      where: { userId_questionId: { userId: req.user.id, questionId } },
       update: { value },
-      create: { userId: req.user!.id, questionId, value },
+      create: { userId: req.user.id, questionId, value },
     });
   }
-
-  const votes = await prisma.vote.findMany({
-    where: { questionId },
-    select: { value: true, userId: true },
-  });
-  res.json({ ok: true, votes: summarizeVotes(votes, req.user!.id) });
-});
-
-router.post("/:id/view", async (req, res) => {
-  const questionId = String(req.params.id);
-  const q = await prisma.question.updateMany({
-    where: { id: questionId, deletedAt: null, isApproved: true },
-    data: { viewsCount: { increment: 1 } },
-  });
-  if (q.count === 0) return res.status(404).json({ message: "Not found" });
   res.json({ ok: true });
 });
-
-router.post("/:id/bookmark", authRequired, async (req, res) => {
-  const questionId = String(req.params.id);
-  const q = await prisma.question.findFirst({
-    where: { id: questionId, deletedAt: null },
-    select: { id: true },
-  });
-  if (!q) return res.status(404).json({ message: "Not found" });
-
-  const existed = await prisma.bookmark.findUnique({
-    where: { userId_questionId: { userId: req.user!.id, questionId } },
-  });
-
-  if (existed) {
-    await prisma.bookmark.delete({ where: { id: existed.id } });
-    return res.json({ ok: true, isBookmarked: false });
-  }
-
-  await prisma.bookmark.create({ data: { userId: req.user!.id, questionId } });
-  res.json({ ok: true, isBookmarked: true });
-});
-
-export const questionsRouter = router;
+exports.questionsRouter = router;
