@@ -1,51 +1,56 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.notificationRoutes = void 0;
-const express_1 = require("express");
-const db_1 = require("../db");
-const auth_1 = require("../middlewares/auth");
-const zod_1 = require("zod");
-const router = (0, express_1.Router)();
-const notificationResponseSchema = zod_1.z.object({
-    id: zod_1.z.string(),
-    recipientId: zod_1.z.string(),
-    senderId: zod_1.z.string(),
-    type: zod_1.z.string(),
-    content: zod_1.z.string(),
-    targetId: zod_1.z.string(),
-    isRead: zod_1.z.boolean(),
-    createdAt: zod_1.z.date(),
+import { Router } from 'express';
+import { prisma } from '../db'; 
+import { authRequired } from '../middlewares/auth';
+import { z } from 'zod';
+
+const router = Router();
+
+const notificationResponseSchema = z.object({
+  id: z.string(),
+  recipientId: z.string(),
+  senderId: z.string(),
+  type: z.string(),
+  content: z.string(),
+  targetId: z.string(),
+  isRead: z.boolean(),
+  createdAt: z.date(),
 });
-const notificationListResponseSchema = zod_1.z.array(notificationResponseSchema);
-router.get('/', auth_1.authRequired, async (req, res) => {
-    try {
-        const userId = req.user.id;
-        const list = await db_1.prisma.notification.findMany({
-            where: { recipientId: userId },
-            orderBy: { createdAt: 'desc' },
-            take: 20
-        });
-        const validatedData = notificationListResponseSchema.parse(list);
-        res.json(validatedData);
+
+const notificationListResponseSchema = z.array(notificationResponseSchema);
+
+router.get('/', authRequired, async (req: any, res) => {
+  try {
+    const userId = req.user.id;
+
+    const list = await prisma.notification.findMany({
+      where: { recipientId: userId },
+      orderBy: { createdAt: 'desc' },
+      take: 20
+    });
+
+    const validatedData = notificationListResponseSchema.parse(list);
+    res.json(validatedData);
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return res.status(400).json({ message: 'Dữ liệu không hợp lệ', errors: error.flatten() });
     }
-    catch (error) {
-        if (error instanceof zod_1.z.ZodError) {
-            return res.status(400).json({ message: 'Dữ liệu không hợp lệ', errors: error.flatten() });
-        }
-        res.status(500).json({ message: 'Lỗi server khi lấy thông báo' });
-    }
+    res.status(500).json({ message: 'Lỗi server khi lấy thông báo' });
+  }
 });
-router.post('/read-all', auth_1.authRequired, async (req, res) => {
-    try {
-        const userId = req.user.id;
-        await db_1.prisma.notification.updateMany({
-            where: { recipientId: userId, isRead: false },
-            data: { isRead: true }
-        });
-        res.json({ success: true });
-    }
-    catch (error) {
-        res.status(500).json({ message: 'Lỗi server' });
-    }
+
+router.post('/read-all', authRequired, async (req: any, res) => {
+  try {
+    const userId = req.user.id;
+
+    await prisma.notification.updateMany({
+      where: { recipientId: userId, isRead: false },
+      data: { isRead: true }
+    });
+
+    res.json({ success: true });
+  } catch (error) {
+    res.status(500).json({ message: 'Lỗi server' });
+  }
 });
-exports.notificationRoutes = router;
+
+export const notificationRoutes = router;
