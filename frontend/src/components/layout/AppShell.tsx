@@ -5,6 +5,7 @@ import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import { logout } from '../../store/authSlice';
 import { useState, useEffect } from 'react';
 import { api } from '../../services/api';
+import Footer from './Footer';
 import { storage } from '../../services/storage';
 
 const { Header, Content, Sider } = Layout;
@@ -136,8 +137,8 @@ export function AppShell() {
   );
 
   const sidebarItems = [
-    { key: '/', label: <Link to="/">Questions</Link> },
-    { key: '/ask', label: <Link to="/ask">Ask a Question</Link> },
+    { key: '/', label: <Link to="/">Câu hỏi</Link> },
+    { key: '/ask', label: <Link to="/ask">Đặt câu hỏi</Link> },
   ];
 
   if (user?.role === 'ADMIN') {
@@ -232,7 +233,7 @@ export function AppShell() {
                 style={{ backgroundColor: '#e1ecf4', color: '#39739d', borderColor: '#7aa7c7', borderRadius: '3px' }} 
                 onClick={() => nav('/login')}
               >
-                Log in
+                Đăng nhập
               </Button>
               <Button 
                 type="primary" 
@@ -240,7 +241,7 @@ export function AppShell() {
                 style={{ backgroundColor: '#0a95ff', borderColor: 'transparent', borderRadius: '3px' }} 
                 onClick={() => nav('/register')}
               >
-                Sign up
+                Đăng ký
               </Button>
             </>
           )}
@@ -275,7 +276,8 @@ export function AppShell() {
         <Content style={{ padding: '24px', backgroundColor: '#ffffff', minHeight: 'calc(100vh - 50px)', flex: 1 }}>
           <Outlet />
         </Content>
-      </Layout>
+        </Layout>
+        <Footer />
     </Layout>
   );
 }
