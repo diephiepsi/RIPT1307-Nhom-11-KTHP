@@ -6,6 +6,7 @@ import { logout } from '../../store/authSlice';
 import { useState, useEffect } from 'react';
 import { api } from '../../services/api';
 import Footer from './Footer';
+import ThemeToggle from './ThemeToggle';
 import { storage } from '../../services/storage';
 
 const { Header, Content, Sider } = Layout;
@@ -181,6 +182,7 @@ export function AppShell() {
         </Space>
 
         <Space size="middle">
+          <ThemeToggle />
           {user ? (
             <>
               {/* --- NÚT CHUÔNG THÔNG BÁO --- */}
