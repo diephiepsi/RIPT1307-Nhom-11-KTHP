@@ -6,6 +6,7 @@ import { App } from './App';
 import { store } from './store/store';
 import { router } from './router';
 import { ConfigProvider } from 'antd';
+import ThemeProvider from './providers/ThemeProvider';
 
 import 'antd/dist/reset.css';
 import './styles/theme.css';
@@ -13,19 +14,11 @@ import './styles/theme.css';
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <Provider store={store}>
-      <ConfigProvider
-        theme={{
-          token: {
-            colorPrimary: '#0f1724',
-            borderRadius: 12,
-            colorBgContainer: '#ffffff',
-          },
-        }}
-      >
+      <ThemeProvider>
         <App>
           <RouterProvider router={router} />
         </App>
-      </ConfigProvider>
+      </ThemeProvider>
     </Provider>
   </React.StrictMode>,
 );
