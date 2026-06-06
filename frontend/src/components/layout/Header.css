@@ -5,7 +5,7 @@
   width: 100%;
   background-color: #ffffff;
   border-top: 4px solid var(--so-orange);
-  border-b: 1px solid var(--so-border);
+  border-bottom: 1px solid var(--so-border);
   box-shadow: 0 1px 2px rgba(0,0,0,0.05);
 }
 
@@ -38,16 +38,18 @@
 
 .search-bar input {
   width: 100%;
-  padding: 6px 12px;
-  font-size: 0.85rem;
+  padding: 8px 12px;
+  font-size: 0.9rem;
   border: 1px solid var(--so-border);
-  border-radius: 3px;
+  border-radius: 8px;
   outline: none;
+  background: var(--so-accent-soft);
+  color: var(--so-dark-text);
 }
 
 .search-bar input:focus {
-  border-color: #6bbbf7;
-  box-shadow: 0 0 0 4px rgba(0, 149, 255, 0.15);
+  border-color: var(--so-blue-hover);
+  box-shadow: 0 0 0 4px rgba(31,120,180,0.12);
 }
 
 .auth-buttons {
@@ -56,21 +58,21 @@
 }
 
 .btn-login {
-  padding: 6px 12px;
+  padding: 8px 14px;
   font-size: 0.85rem;
-  color: #39739d;
+  color: var(--so-blue);
   background-color: var(--so-light-blue);
-  border: 1px solid #7aa7c7;
-  border-radius: 3px;
+  border: 1px solid rgba(31,120,180,0.24);
+  border-radius: 6px;
   cursor: pointer;
 }
 
 .btn-signup {
-  padding: 6px 12px;
+  padding: 8px 14px;
   font-size: 0.85rem;
   color: #ffffff;
   background-color: var(--so-blue);
   border: 1px solid transparent;
-  border-radius: 3px;
+  border-radius: 6px;
   cursor: pointer;
 }

@@ -1,12 +1,15 @@
 /* src/index.css */
 :root {
-  --so-orange: #f48225;
-  --so-light-bg: #f8f9fa;
-  --so-border: #e3e6e8;
-  --so-dark-text: #232629;
-  --so-blue: #0a95ff;
-  --so-light-blue: #e1ecf4;
-  --so-blue-hover: #0074cc;
+  --so-orange: #2f9bb0;
+  --so-light-bg: #f4f6f8;
+  --so-border: #d8e3ea;
+  --so-dark-text: #112938;
+  --so-muted-text: #5a7280;
+  --so-blue: #1f78b4;
+  --so-light-blue: #e8f3fb;
+  --so-blue-hover: #176599;
+  --so-accent: #2f9bb0;
+  --so-accent-soft: #e8f5f8;
   --header-height: 48px;
 }
 

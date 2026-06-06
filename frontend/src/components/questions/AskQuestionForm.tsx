@@ -21,7 +21,7 @@ export default function AskQuestionForm() {
       onFinish={async (values) => {
         try {
           const created = await questionsService.create(values);
-          message.success('Đăng bài thành công');
+          message.success('Đã đăng, đang chờ phê duyệt');
           window.location.href = `/questions/${created.id}`;
         } catch (err) {
           console.error(err);

@@ -1,108 +1,121 @@
 import { Router } from "express";
 import { z } from "zod";
+
 import { prisma } from "../db";
 import { authRequired } from "../middlewares/auth";
+import { summarizeVotes } from "../utils/voting";
 
 const router = Router();
 
-router.post("/:id/vote", authRequired, async (req, res) => {
-  const schema = z.object({
-    value: z.union([z.literal(-1), z.literal(0), z.literal(1)]),
-  });
-  const parsed = schema.safeParse(req.body);
-  if (!parsed.success) return res.status(400).json(parsed.error.flatten());
-  const commentId = String(req.params.id);
+function getSenderName(user: any) {
+  return user?.fullName || user?.full_name || user?.email || "Một thành viên";
+}
 
-  try {
-    const c = await prisma.comment.findFirst({
-      where: { id: commentId, deletedAt: null },
-      select: { id: true, authorId: true, questionId: true },
-    });
-    if (!c) return res.status(404).json({ message: "Not found" });
+function mapComment(c: any, myUserId?: string) {
+  const votes = summarizeVotes(c.votes ?? [], myUserId);
 
-    const value = parsed.data.value;
-    if (value === 0) {
-      await prisma.vote.deleteMany({
-        where: { userId: req.user!.id, commentId },
-      });
-    } else {
-      await prisma.vote.upsert({
-        where: { userId_commentId: { userId: req.user!.id, commentId } },
-        update: { value },
-        create: { userId: req.user!.id, commentId, value },
-      });
+  return {
+    id: c.id,
+    content: c.content,
+    parentId: c.parentId,
+    createdAt: c.createdAt.toISOString(),
+    author: c.author,
 
-      try {
-        if (value === 1 && c.authorId !== req.user!.id) {
-          // Ép kiểu or fallback linh hoạt phòng trường hợp JwtUser khai báo thiếu trường ở các file gõ khác nhau
-          const u = req.user as any;
-          const senderName =
-            u?.full_name || u?.fullName || u?.email || "Một thành viên";
+    votes,
+    likesCount: votes.likesCount,
+    dislikesCount: votes.dislikesCount,
+  };
+}
 
-          await prisma.notification.create({
-            data: {
-              id:
-                "noti_v_" +
-                Date.now() +
-                Math.random().toString(36).substring(2, 5),
-              recipientId: c.authorId,
-              senderId: req.user!.id,
-              type: "LIKE",
-              content: `${senderName} đã thích bình luận của bạn`,
-              targetId: c.questionId,
-            },
-          });
-          console.log("=> [Notification] Đã tạo thông báo LIKE bình luận.");
-        }
-      } catch (notifError) {
-        // Lỗi tạo thông báo chỉ in ra terminal debug, không block luồng vote chính
-        console.error(
-          "⚠️ Lỗi ngầm khi tạo thông báo tương tác Vote:",
-          notifError,
-        );
-      }
-    }
-    return res.json({ ok: true });
-  } catch (globalError) {
-    console.error("CRITICAL ERROR (Vote sập):", globalError);
-    return res.status(500).json({ error: "Lỗi hệ thống xử lý vote" });
-  }
-});
-
+/**
+ * POST /api/comments
+ * Tạo bình luận bằng postId từ body
+ * Dùng cho frontend nào đang gửi { postId, content, parentId? }
+ */
 router.post("/", authRequired, async (req, res) => {
-  const commentSchema = z.object({
-    content: z.string().min(1),
-    postId: z.string(), // postId gửi từ frontend lên
-  });
-
-  const parsed = commentSchema.safeParse(req.body);
-  if (!parsed.success) return res.status(400).json(parsed.error.flatten());
-
-  const { content, postId } = parsed.data;
-
   try {
-    // 1. Tạo bản ghi bình luận mới (Luôn được ưu tiên xử lý trước)
-    const newComment = await prisma.comment.create({
-      data: {
-        id: "cmt_" + Date.now(),
-        content,
-        questionId: postId,
-        authorId: req.user!.id,
+    const commentSchema = z.object({
+      content: z.string().min(1, "Nội dung bình luận không được để trống"),
+      postId: z.string().min(1, "Thiếu postId"),
+      parentId: z.string().optional().nullable(),
+    });
+
+    const parsed = commentSchema.safeParse(req.body);
+
+    if (!parsed.success) {
+      return res.status(400).json(parsed.error.flatten());
+    }
+
+    const { content, postId, parentId } = parsed.data;
+
+    const question = await prisma.question.findFirst({
+      where: {
+        id: postId,
+        deletedAt: null,
+      },
+      select: {
+        id: true,
+        title: true,
+        authorId: true,
       },
     });
 
-    try {
-      const question = await prisma.question.findFirst({
-        where: { id: postId, deletedAt: null },
+    if (!question) {
+      return res.status(404).json({ message: "Không tìm thấy bài viết" });
+    }
+
+    if (parentId) {
+      const parent = await prisma.comment.findFirst({
+        where: {
+          id: parentId,
+          questionId: postId,
+          deletedAt: null,
+        },
+        select: {
+          id: true,
+        },
       });
-      if (question && question.authorId !== req.user!.id) {
-        const u = req.user as any;
-        const senderName =
-          u?.full_name || u?.fullName || u?.email || "Một thành viên";
+
+      if (!parent) {
+        return res.status(400).json({
+          message: "Không tìm thấy bình luận cha",
+        });
+      }
+    }
+
+    const newComment = await prisma.comment.create({
+      data: {
+        content,
+        questionId: postId,
+        authorId: req.user!.id,
+        parentId: parentId ?? null,
+      },
+
+      include: {
+        author: {
+          select: {
+            id: true,
+            fullName: true,
+            role: true,
+          },
+        },
+
+        votes: {
+          select: {
+            value: true,
+            userId: true,
+          },
+        },
+      },
+    });
+
+    // Notification cho chủ bài viết, không gửi nếu tự bình luận bài của mình
+    if (question.authorId !== req.user!.id) {
+      try {
+        const senderName = getSenderName(req.user);
 
         await prisma.notification.create({
           data: {
-            id: "noti_c_" + Date.now(),
             recipientId: question.authorId,
             senderId: req.user!.id,
             type: "COMMENT",
@@ -110,21 +123,130 @@ router.post("/", authRequired, async (req, res) => {
             targetId: postId,
           },
         });
+
         console.log("=> [Notification] Đã tạo thông báo COMMENT bài viết.");
+      } catch (notifError) {
+        console.error(
+          "⚠️ Lỗi ngầm khi tạo thông báo bình luận bài viết:",
+          notifError,
+        );
       }
-    } catch (notifError) {
-      // Nếu phần thông báo gãy (ví dụ database chưa đồng bộ kịp model), comment vẫn chạy bình thường
-      console.error(
-        "⚠️ Lỗi ngầm khi tạo thông báo bình luận bài viết:",
-        notifError,
-      );
     }
 
-    // Luôn trả về dữ liệu bình luận thành công cho Frontend
-    return res.json(newComment);
+    return res.status(201).json(mapComment(newComment, req.user!.id));
   } catch (globalError) {
     console.error("CRITICAL ERROR (Comment sập):", globalError);
-    return res.status(500).json({ error: "Lỗi hệ thống xử lý bình luận" });
+    return res.status(500).json({
+      error: "Lỗi hệ thống xử lý bình luận",
+    });
+  }
+});
+
+/**
+ * POST /api/comments/:id/vote
+ * Like/dislike bình luận
+ */
+router.post("/:id/vote", authRequired, async (req, res) => {
+  try {
+    const schema = z.object({
+      value: z.union([z.literal(-1), z.literal(0), z.literal(1)]),
+    });
+
+    const parsed = schema.safeParse(req.body);
+
+    if (!parsed.success) {
+      return res.status(400).json(parsed.error.flatten());
+    }
+
+    const commentId = String(req.params.id);
+
+    const c = await prisma.comment.findFirst({
+      where: {
+        id: commentId,
+        deletedAt: null,
+      },
+      select: {
+        id: true,
+        authorId: true,
+        questionId: true,
+      },
+    });
+
+    if (!c) {
+      return res.status(404).json({ message: "Not found" });
+    }
+
+    const value = parsed.data.value;
+
+    if (value === 0) {
+      await prisma.vote.deleteMany({
+        where: {
+          userId: req.user!.id,
+          commentId,
+        },
+      });
+    } else {
+      await prisma.vote.upsert({
+        where: {
+          userId_commentId: {
+            userId: req.user!.id,
+            commentId,
+          },
+        },
+        update: {
+          value,
+        },
+        create: {
+          userId: req.user!.id,
+          commentId,
+          value,
+        },
+      });
+
+      // Notification khi like comment, không gửi nếu tự like comment của mình
+      if (value === 1 && c.authorId !== req.user!.id) {
+        try {
+          const senderName = getSenderName(req.user);
+
+          await prisma.notification.create({
+            data: {
+              recipientId: c.authorId,
+              senderId: req.user!.id,
+              type: "LIKE",
+              content: `${senderName} đã thích bình luận của bạn`,
+              targetId: c.questionId,
+            },
+          });
+
+          console.log("=> [Notification] Đã tạo thông báo LIKE bình luận.");
+        } catch (notifError) {
+          console.error(
+            "⚠️ Lỗi ngầm khi tạo thông báo tương tác Vote:",
+            notifError,
+          );
+        }
+      }
+    }
+
+    const votes = await prisma.vote.findMany({
+      where: {
+        commentId,
+      },
+      select: {
+        value: true,
+        userId: true,
+      },
+    });
+
+    return res.json({
+      ok: true,
+      votes: summarizeVotes(votes, req.user!.id),
+    });
+  } catch (globalError) {
+    console.error("CRITICAL ERROR (Vote comment sập):", globalError);
+    return res.status(500).json({
+      error: "Lỗi hệ thống xử lý vote bình luận",
+    });
   }
 });
 
