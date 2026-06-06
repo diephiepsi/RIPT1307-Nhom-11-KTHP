@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { TinyEditor } from '../../components/common/TinyEditor';
 import type { Tag } from '../../models/qa';
 import { questionsService } from '../../services/questions';
+import '../../styles/theme.css';
 
 export function AskQuestionPage() {
   const { message } = App.useApp();
@@ -17,30 +18,20 @@ export function AskQuestionPage() {
       .catch(() => void 0);
   }, []);
 
-  // Style chung cho các block bao quanh mỗi input item
-  const formCardStyle = {
-    background: '#ffffff',
-    border: '1px solid #e3e6e8',
-    borderRadius: '3px',
-    padding: '24px',
-    marginBottom: '16px',
-    boxShadow: '0 1px 3px rgba(0,0,0,0.04)'
-  };
-
   return (
-    <div style={{ maxWidth: '850px', margin: '0 auto', fontFamily: 'sans-serif' }}>
-      
-      {/* Tiêu đề trang lớn */}
-      <div style={{ marginBottom: '24px', paddingTop: '12px' }}>
-        <Typography.Title level={2} style={{ margin: 0, fontWeight: 600, fontSize: '1.7rem', color: '#232629' }}>
-          Ask a public question
+    <div className="ub-container" style={{ fontFamily: 'Inter, system-ui, -apple-system, sans-serif' }}>
+
+      <div className="ub-title">
+        <Typography.Title level={2} style={{ margin: 0, fontSize: '1.6rem' }}>
+          Đặt câu hỏi
         </Typography.Title>
       </div>
 
       <Form
+        className="ub-form"
         layout="vertical"
         initialValues={{ tags: [] as string[], content: '' }}
-        requiredMark={false} // Ẩn dấu hoa thị đỏ (*) mặc định của Antd để giống Stack Overflow
+        requiredMark={false}
         onFinish={async (values) => {
           try {
             const created = await questionsService.create(values);
@@ -51,38 +42,29 @@ export function AskQuestionPage() {
           }
         }}
       >
-        
-        {/* BLOCK 1: TIÊU ĐỀ (TITLE) */}
-        <div style={formCardStyle}>
-          <Form.Item 
-            name="title" 
+
+        <div className="ub-card">
+          <Form.Item
+            name="title"
             label={
-              <div style={{ display: 'flex', flexDirection: 'column' }}>
-                <span style={{ fontSize: '1rem', fontWeight: 600, color: '#0c0d0e', lineHeight: '1.2' }}>Title</span>
-                <span style={{ fontSize: '0.78rem', fontWeight: 400, color: '#3b4045', marginTop: '4px' }}>
-                  Be specific and imagine you’re asking a question to another person.
-                </span>
+              <div>
+                <div style={{ fontSize: '1rem', fontWeight: 600, color: '#0c0d0e' }}>Tiêu đề</div>
+                <div className="ub-muted">Hãy mô tả cụ thể vấn đề; tiêu đề càng rõ ràng càng dễ nhận được trả lời.</div>
               </div>
             }
-            rules={[{ required: true, message: 'Please enter a title (min 10 characters)', min: 10 }]}
+            rules={[{ required: true, message: 'Vui lòng nhập tiêu đề (ít nhất 10 ký tự)', min: 10 }]}
           >
-            <Input 
-              placeholder="e.g. Is there an R function for finding the index of an element?" 
-              style={{ borderRadius: '3px', padding: '8px', fontSize: '0.9rem' }}
-            />
+            <Input className="ub-input" placeholder="Ví dụ: Làm sao để tìm chỉ số phần tử trong R?" />
           </Form.Item>
         </div>
 
-        {/* BLOCK 2: NỘI DUNG CHI TIẾT (BODY WITH TINYEDITOR) */}
-        <div style={formCardStyle}>
+        <div className="ub-card">
           <Form.Item
             name="content"
             label={
-              <div style={{ display: 'flex', flexDirection: 'column' }}>
-                <span style={{ fontSize: '1rem', fontWeight: 600, color: '#0c0d0e', lineHeight: '1.2' }}>Body</span>
-                <span style={{ fontSize: '0.78rem', fontWeight: 400, color: '#3b4045', marginTop: '4px' }}>
-                  Introduce the problem and expand on what you put in the title. Minimum 20 characters.
-                </span>
+              <div>
+                <div style={{ fontSize: '1rem', fontWeight: 600, color: '#0c0d0e' }}>Nội dung</div>
+                <div className="ub-muted">Mô tả chi tiết vấn đề và các bước bạn đã thử. Tối thiểu 20 ký tự.</div>
               </div>
             }
             rules={[
@@ -99,68 +81,36 @@ export function AskQuestionPage() {
           </Form.Item>
         </div>
 
-        {/* BLOCK 3: THẺ PHÂN LOẠI (TAGS) */}
-        <div style={formCardStyle}>
-          <Form.Item 
-            name="tags" 
+        <div className="ub-card">
+          <Form.Item
+            name="tags"
             label={
-              <div style={{ display: 'flex', flexDirection: 'column' }}>
-                <span style={{ fontSize: '1rem', fontWeight: 600, color: '#0c0d0e', lineHeight: '1.2' }}>Tags</span>
-                <span style={{ fontSize: '0.78rem', fontWeight: 400, color: '#3b4045', marginTop: '4px' }}>
-                  Add up to 5 tags to describe what your question is about.
-                </span>
+              <div>
+                <div style={{ fontSize: '1rem', fontWeight: 600, color: '#0c0d0e' }}>Thẻ (Tags)</div>
+                <div className="ub-muted">Thêm tối đa 5 thẻ để mô tả chủ đề câu hỏi.</div>
               </div>
             }
-            rules={[{ required: true, message: 'Please select at least one tag' }]}
+            rules={[{ required: true, message: 'Vui lòng chọn ít nhất một thẻ' }]}
           >
             <Select
               mode="multiple"
-              placeholder="e.g. (javascript reactjs c++)"
+              placeholder="Ví dụ: javascript, reactjs, c++"
               options={tags.map((t) => ({ label: t.name, value: t.name }))}
               style={{ width: '100%' }}
-              dropdownStyle={{ borderRadius: '3px' }}
-              // Custom style cho các Tag được chọn hiện lên giống Stack Overflow
+              // keep dropdown styling default; chosen tags use custom renderer
               tagRender={({ label, onClose }) => (
-                <span style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  backgroundColor: '#e1ecf4',
-                  color: '#39739d',
-                  padding: '2px 6px',
-                  margin: '2px 4px 2px 0',
-                  borderRadius: '3px',
-                  fontSize: '0.78rem'
-                }}>
+                <span className="ub-tag">
                   {label}
-                  <span 
-                    onClick={onClose} 
-                    style={{ marginLeft: '6px', cursor: 'pointer', fontWeight: 'bold', color: '#2c5777' }}
-                  >
-                    ×
-                  </span>
+                  <span onClick={onClose} style={{ marginLeft: 8, cursor: 'pointer' }}>×</span>
                 </span>
               )}
             />
           </Form.Item>
         </div>
 
-        {/* NÚT SUBMIT ĐĂNG BÀI VIẾT */}
-        <div style={{ marginTop: '24px', marginBottom: '40px' }}>
-          <Button 
-            type="primary" 
-            htmlType="submit"
-            style={{
-              backgroundColor: '#0a95ff',
-              borderColor: 'transparent',
-              borderRadius: '3px',
-              padding: '12px 18px',
-              height: 'auto',
-              fontWeight: 500,
-              fontSize: '0.95rem',
-              boxShadow: 'inset 0 1px 0 0 rgba(255,255,255,0.4)'
-            }}
-          >
-            Post your question
+        <div style={{ marginTop: 28, marginBottom: 40 }}>
+          <Button type="primary" htmlType="submit" className="ub-btn ub-btn-primary">
+            Gửi câu hỏi
           </Button>
         </div>
 

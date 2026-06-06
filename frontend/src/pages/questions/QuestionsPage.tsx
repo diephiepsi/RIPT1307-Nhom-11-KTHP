@@ -258,16 +258,14 @@ export function QuestionsPage() {
       >
         {/* Bộ lọc đẹp */}
         <Card
+          className="ub-card"
           style={{
             borderRadius: 20,
-            border: "none",
-            boxShadow: "0 4px 20px -4px rgba(0,0,0,0.05)",
             marginBottom: 32,
             background: "#ffffff",
           }}
-          bodyStyle={{ padding: 20 }}
         >
-          <Space direction="vertical" size={14} style={{ width: "100%" }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 14, width: '100%' }}>
             <Input
               allowClear
               size="large"
@@ -350,11 +348,11 @@ export function QuestionsPage() {
                 </Button>
               )}
             </div>
-          </Space>
+          </div>
         </Card>
 
         {/* Danh sách câu hỏi */}
-        <Spin spinning={loading} tip="Đang tải...">
+        <Spin spinning={loading}>
           {rows.length === 0 ? (
             <div
               style={{
@@ -383,19 +381,17 @@ export function QuestionsPage() {
 
                 return (
                   <Card
-                    key={item.id}
-                    hoverable
-                    style={{
-                      borderRadius: 24,
-                      border: "1px solid #eef2f6",
-                      boxShadow: "0 6px 18px -4px rgba(0,0,0,0.03)",
-                      transition: "all 0.3s ease",
-                      background: "#ffffff",
-                    }}
-                    bodyStyle={{ padding: 0 }}
-                    onClick={() => navigate(`/questions/${item.id}`)}
-                  >
-                    <div style={{ padding: "22px 24px" }}>
+                      key={item.id}
+                      hoverable
+                      className="ub-card"
+                      style={{
+                        borderRadius: 24,
+                        transition: "all 0.3s ease",
+                        background: "#ffffff",
+                      }}
+                      onClick={() => navigate(`/questions/${item.id}`)}
+                    >
+                      <div style={{ padding: "22px 24px" }}>
                       {/* Trên cùng: tags + tác giả */}
                       <div
                         style={{

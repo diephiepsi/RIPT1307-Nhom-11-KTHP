@@ -433,15 +433,15 @@ export function QuestionDetailPage() {
         style={{ maxWidth: 1100, margin: "0 auto", padding: "48px 24px 80px" }}
       >
         <Card
+          className="ub-card"
           style={{
             borderRadius: 28,
-            border: "none",
             boxShadow: "0 20px 60px -20px rgba(0,0,0,0.1)",
             background: "#ffffff",
             overflow: "hidden",
           }}
-          bodyStyle={{ padding: "48px 56px" }}
         >
+          <div style={{ padding: '48px 56px' }}>
           <Title
             level={1}
             style={{
@@ -514,7 +514,6 @@ export function QuestionDetailPage() {
               borderRadius: 18,
               padding: "28px 32px",
               marginBottom: 32,
-              border: "1px solid #eef2f6",
               fontSize: 17,
               lineHeight: 1.85,
               color: "#1e293b",
@@ -552,7 +551,6 @@ export function QuestionDetailPage() {
               icon={<DislikeOutlined />}
               onClick={() => void handleQuestionVote(-1)}
               size="large"
-              danger={question.votes?.myVote === -1}
               style={{
                 fontWeight: 600,
                 borderRadius: 12,
@@ -679,6 +677,7 @@ export function QuestionDetailPage() {
             >
               Gửi câu trả lời
             </Button>
+          </div>
           </div>
         </Card>
       </main>

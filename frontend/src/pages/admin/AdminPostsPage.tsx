@@ -83,14 +83,14 @@ export function AdminPostsPage() {
 
             {/* Nút Xóa bài */}
             <Button
-              danger
+              className="ub-btn ub-btn-danger"
               onClick={() => {
                 modal.confirm({
                   title: 'Xóa bài?',
                   content: 'Thao tác này không thể hoàn tác.',
                   okText: 'Xóa',
                   cancelText: 'Hủy',
-                  okButtonProps: { danger: true },
+                  okButtonProps: { className: 'ub-btn ub-btn-danger' },
                   onOk: async () => {
                     try {
                       await adminApi.deletePost(r.id);
@@ -113,10 +113,12 @@ export function AdminPostsPage() {
   );
 
   return (
-    <Space direction="vertical" style={{ width: '100%' }} size="large">
-      <Typography.Title level={3} style={{ margin: 0 }}>
-        Quản trị bài đăng
-      </Typography.Title>
+    <div className="ub-container">
+      <div style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <Typography.Title level={3} style={{ margin: 0 }}>
+          Quản trị bài đăng
+        </Typography.Title>
+      </div>
       <Table rowKey="id" loading={loading} columns={columns} dataSource={rows} />
 
       {/* MỚI THÊM: Modal hiển thị chi tiết bài đăng */}

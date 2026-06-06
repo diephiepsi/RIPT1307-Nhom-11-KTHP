@@ -26,7 +26,7 @@ export function App({ children }: PropsWithChildren) {
   if (checkingAuth) {
     return (
       <div style={{ display: 'flex', height: '100vh', justifyContent: 'center', alignItems: 'center', backgroundColor: '#f8f9fa' }}>
-        <Spin size="large" tip="Connecting to UniBrain.com..." />
+        <Spin size="large" />
       </div>
     );
   }

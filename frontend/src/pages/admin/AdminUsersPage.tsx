@@ -91,7 +91,7 @@ export function AdminUsersPage() {
               okText="Xóa"
               cancelText="Hủy"
             >
-              <Button danger size="small">Xóa</Button>
+              <Button className="ub-btn ub-btn-danger" size="small">Xóa</Button>
             </Popconfirm>
 
             {/* Nút Reset Mật Khẩu */}
@@ -116,15 +116,15 @@ export function AdminUsersPage() {
   );
 
   return (
-    <Space direction="vertical" style={{ width: '100%' }} size="large">
-      <Space style={{ width: '100%', justifyContent: 'space-between' }}>
+    <div className="ub-container">
+      <div style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <Typography.Title level={3} style={{ margin: 0 }}>
           Quản lý người dùng
         </Typography.Title>
         <Button type="primary" onClick={() => setOpenAddModal(true)}>
           Thêm người dùng
         </Button>
-      </Space>
+      </div>
 
       <Table rowKey="id" loading={loading} columns={columns} dataSource={rows} />
 

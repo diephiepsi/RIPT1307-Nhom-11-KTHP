@@ -37,18 +37,9 @@ export function RegisterPage() {
 </div>
 
       {/* KHỐI BOX ĐĂNG KÝ (CARD) */}
-      <Card 
-        style={{ 
-          width: '100%',
-          maxWidth: '360px', // Rộng hơn trang Login một chút để chứa vừa form thông tin
-          boxShadow: '0 10px 25px rgba(0, 0, 0, 0.05), 0 5px 10px rgba(0, 0, 0, 0.03)',
-          borderRadius: '7px',
-          border: '1px solid #e3e6e8',
-          backgroundColor: '#ffffff'
-        }}
-        bodyStyle={{ padding: '24px' }}
-      >
-        <Form
+      <div style={{ width: '100%', display: 'flex', justifyContent: 'center' }}>
+        <Card className="ub-card" style={{ maxWidth: '360px' }}>
+          <Form
           layout="vertical"
           requiredMark={false} // Ẩn dấu hoa thị đỏ (*) rối mắt
           initialValues={{ role: 'STUDENT' }}
@@ -65,11 +56,11 @@ export function RegisterPage() {
           {/* Ô nhập Họ tên */}
           <Form.Item 
             name="fullName" 
-            label={<span style={{ fontWeight: 600, color: '#0c0d0e', fontSize: '0.9rem' }}>Display name</span>}
+            label={<span style={{ fontWeight: 600, color: '#0c0d0e', fontSize: '0.9rem' }}>Họ và tên</span>}
             rules={[{ required: true, message: 'Vui lòng nhập họ tên' }]}
             style={{ marginBottom: '16px' }}
           >
-            <Input style={{ borderRadius: '3px', padding: '8px' }} />
+            <Input className="ub-input" />
           </Form.Item>
 
           {/* Ô nhập Email */}
@@ -85,11 +76,11 @@ export function RegisterPage() {
           {/* Ô nhập Mật khẩu */}
           <Form.Item 
             name="password" 
-            label={<span style={{ fontWeight: 600, color: '#0c0d0e', fontSize: '0.9rem' }}>Password</span>}
+            label={<span style={{ fontWeight: 600, color: '#0c0d0e', fontSize: '0.9rem' }}>Mật khẩu</span>}
             rules={[{ required: true, message: 'Mật khẩu tối thiểu 6 ký tự', min: 6 }]}
             style={{ marginBottom: '16px' }}
           >
-            <Input.Password style={{ borderRadius: '3px', padding: '8px' }} />
+            <Input.Password className="ub-input" />
           </Form.Item>
 
           {/* Ô chọn Vai trò */}
@@ -115,28 +106,23 @@ export function RegisterPage() {
             type="primary" 
             htmlType="submit" 
             block
-            style={{
-              backgroundColor: '#0a95ff',
-              borderColor: 'transparent',
-              borderRadius: '3px',
-              height: '38px',
-              fontWeight: 500,
-              fontSize: '0.9rem'
-            }}
+            className="ub-btn ub-btn-primary"
+            style={{ height: 44, fontWeight: 600 }}
           >
-            Sign up
+            Đăng ký
           </Button>
         </Form>
-      </Card>
+        </Card>
+      </div>
 
       {/* DÒNG ĐIỀU HƯỚNG PHỤ QUAY LẠI LOGIN */}
-      <div style={{ marginTop: '24px', fontSize: '0.85rem', color: '#232629' }}>
-        Already have an account?{' '}
+      <div style={{ marginTop: '24px', fontSize: '0.95rem', color: '#232629' }}>
+        Bạn đã có tài khoản?{' '}
         <span 
           onClick={() => nav('/login')} 
-          style={{ color: '#0074cc', cursor: 'pointer' }}
+          style={{ color: '#2563eb', cursor: 'pointer', fontWeight: 600 }}
         >
-          Log in
+          Đăng nhập
         </span>
       </div>
 
