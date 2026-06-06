@@ -173,12 +173,7 @@ INSERT INTO votes (id, value, user_id, post_id, comment_id) VALUES
 ('vote_c001', 1, 'usr_student001', NULL, 'cmt_001'),
 ('vote_c002', 1, 'usr_student001', NULL, 'cmt_002');
 
--- =========================
--- Tài khoản đăng nhập thử:
---   admin@gmail.com   / 123456  (ADMIN)
---   student@gmail.com / 123456  (STUDENT)
---   teacher@gmail.com / 123456  (LECTURER)
--- =========================
+
 CREATE TABLE notifications (
   id           VARCHAR(30)  NOT NULL,
   recipient_id VARCHAR(30)  NOT NULL, -- Người nhận thông báo (chủ bài viết)
@@ -193,3 +188,6 @@ CREATE TABLE notifications (
   CONSTRAINT fk_notifications_recipient FOREIGN KEY (recipient_id) REFERENCES users(id) ON DELETE CASCADE,
   CONSTRAINT fk_notifications_sender    FOREIGN KEY (sender_id)    REFERENCES users(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+/
