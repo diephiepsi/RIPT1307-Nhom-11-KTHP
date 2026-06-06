@@ -11,8 +11,8 @@ export const Header: React.FC = () => {
         </div>
         
         <div className="auth-buttons">
-          <button className="btn-login">Log in</button>
-          <button className="btn-signup">Sign up</button>
+          <button className="btn-login">Đăng nhập</button>
+          <button className="btn-signup">Đăng ký</button>
         </div>
       </div>
     </header>

@@ -501,7 +501,7 @@ export function QuestionsPage() {
                         </Title>
                       </div>
 
-                      {/* Tags */}
+                      {/* Thẻ */}
                       <div style={{ marginBottom: 16 }}>
                         <Space size={[6, 8]} wrap>
                           {item.tags?.map((t) => (
@@ -596,7 +596,7 @@ export function QuestionsPage() {
           )}
         </Spin>
 
-        {/* Tags thịnh hành – nhẹ nhàng, đẹp mắt */}
+        {/* Thẻ thịnh hành – nhẹ nhàng, đẹp mắt */}
         <div
           style={{
             marginTop: 48,
@@ -614,7 +614,7 @@ export function QuestionsPage() {
             }}
           >
             <TagsOutlined style={{ marginRight: 8 }} />
-            Tags phổ biến
+            Thẻ phổ biến
           </Text>
           <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
             {tags.slice(0, 12).map((t) => (

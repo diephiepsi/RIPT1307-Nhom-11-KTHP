@@ -86,7 +86,7 @@ export function AskQuestionPage() {
             name="tags"
             label={
               <div>
-                <div style={{ fontSize: '1rem', fontWeight: 600, color: '#0c0d0e' }}>Thẻ (Tags)</div>
+                <div style={{ fontSize: '1rem', fontWeight: 600, color: '#0c0d0e' }}>Thẻ</div>
                 <div className="ub-muted">Thêm tối đa 5 thẻ để mô tả chủ đề câu hỏi.</div>
               </div>
             }

@@ -100,13 +100,13 @@ export function AdminUsersPage() {
               onClick={async () => {
                 try {
                   await adminApi.resetPassword(r.id);
-                  message.success('Đã reset mật khẩu thành công về 123456');
+                  message.success('Đã đặt lại mật khẩu thành công về 123456');
                 } catch {
-                  message.error('Reset mật khẩu thất bại');
+                  message.error('Đặt lại mật khẩu thất bại');
                 }
               }}
             >
-              Reset Pass
+              Đặt lại mật khẩu
             </Button>
           </Space>
         ),
@@ -210,6 +210,6 @@ export function AdminUsersPage() {
           </Button>
         </Form>
       </Modal>
-    </Space>
+    </div>
   );
 }

@@ -137,7 +137,7 @@ export function AdminPostsPage() {
             <Descriptions.Item label="Tác giả">
               {viewingPost.authorName}
             </Descriptions.Item>
-            <Descriptions.Item label="Tags">
+            <Descriptions.Item label="Thẻ">
               {viewingPost.tags.map((tag) => (
                 <Tag key={tag} color="blue">{tag}</Tag>
               ))}
@@ -151,6 +151,6 @@ export function AdminPostsPage() {
           </Descriptions>
         )}
       </Modal>
-    </Space>
+    </div>
   );
 }
