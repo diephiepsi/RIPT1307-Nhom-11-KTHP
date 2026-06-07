@@ -17,6 +17,7 @@ import {
   PlusCircleOutlined,
   FileTextOutlined,
   TeamOutlined,
+  BarChartOutlined,
 } from "@ant-design/icons";
 import { Link, Outlet, useLocation, useNavigate } from "umi";
 import { useState, useEffect } from "react";
@@ -171,7 +172,7 @@ export default function GlobalLayout() {
       },
       {
         key: "/admin/dashboard",
-        icon: <HomeOutlined />,
+        icon: <BarChartOutlined />,
         label: <Link to="/admin/dashboard">Thống kê</Link>,
       },
     );
