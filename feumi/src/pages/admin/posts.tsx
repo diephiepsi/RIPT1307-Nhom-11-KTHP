@@ -103,63 +103,6 @@ export default function AdminPostsPage() {
     <ConfigProvider locale={viVN}>
       <div style={{ padding: 24 }}>
         <Typography.Title level={3}>Quản trị bài đăng</Typography.Title>
-
-<<<<<<< HEAD
-      <ProTable<AdminPostRow>
-        actionRef={actionRef}
-        rowKey="id"
-        columns={columns}
-        request={async (params) => {
-          try {
-            const { data } = await adminService.getPosts();
-            return { data, success: true };
-          } catch (err) {
-            message.error("Không tải được danh sách bài");
-            return { data: [], success: false };
-          }
-        }}
-        search={false}
-        pagination={{ pageSize: 10 }}
-      />
-
-      <Modal
-        title="Chi tiết bài viết"
-        open={!!viewing}
-        onCancel={() => setViewing(null)}
-        footer={<Button onClick={() => setViewing(null)}>Đóng</Button>}
-        width={800}
-      >
-        {viewing && (
-          <Descriptions column={1} bordered>
-            <Descriptions.Item label="Tiêu đề">
-              {viewing.title}
-            </Descriptions.Item>
-            <Descriptions.Item label="Tác giả">
-              {viewing.authorName}
-            </Descriptions.Item>
-            <Descriptions.Item label="Thẻ">
-              {/* Sử dụng optional chaining (?.) để tránh crash khi bài viết không có thẻ tag */}
-              {viewing.tags?.map((tag) => (
-                <Tag key={tag}>{tag}</Tag>
-              ))}
-            </Descriptions.Item>
-            <Descriptions.Item label="Nội dung">
-              {/* Thêm div hiển thị xuống dòng pre-wrap và thanh cuộn nếu nội dung quá dài */}
-              <div
-                style={{
-                  whiteSpace: "pre-wrap",
-                  maxHeight: "400px",
-                  overflowY: "auto",
-                }}
-              >
-                {viewing.content}
-              </div>
-            </Descriptions.Item>
-          </Descriptions>
-        )}
-      </Modal>
-    </div>
-=======
         <ProTable<AdminPostRow>
           actionRef={actionRef}
           rowKey="id"
@@ -209,6 +152,5 @@ export default function AdminPostsPage() {
         </Modal>
       </div>
     </ConfigProvider>
->>>>>>> 85e59e89e0d31b5000eb4312ed9597e1c036f844
   );
 }
