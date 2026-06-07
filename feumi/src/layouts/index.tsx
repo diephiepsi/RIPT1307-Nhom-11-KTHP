@@ -4,7 +4,8 @@ import { Link, Outlet, useLocation, useNavigate } from 'umi'; // ĐÃ SỬA: Dù
 import { useState, useEffect } from 'react';
 import { api } from '../services/api'; // Đường dẫn đến file axios của bạn
 import { storage } from '../services/storage'; // Đường dẫn đến file lưu token
-
+import { ConfigProvider } from 'antd';
+import viVN from 'antd/locale/vi_VN';
 const { Header, Content, Sider } = Layout;
 
 // Kiểu dữ liệu thông báo
@@ -145,8 +146,8 @@ export default function GlobalLayout() {
   }
 
   return (
-    <Layout style={{ minHeight: '100vh', backgroundColor: '#f8f9fa' }}>
-      
+    <><Layout style={{ minHeight: '100vh', backgroundColor: '#f8f9fa' }}>
+
       {/* --- HEADER --- */}
       <Header style={{
         position: 'sticky', top: 0, zIndex: 1000, width: '100%', height: '50px', lineHeight: '50px',
@@ -155,8 +156,8 @@ export default function GlobalLayout() {
         boxShadow: '0 1px 2px rgba(0,0,0,0.05)'
       }}>
         <Space size="large" style={{ flex: 1, maxWidth: '800px' }}>
-          <Typography.Title 
-            level={4} 
+          <Typography.Title
+            level={4}
             onClick={() => nav('/')}
             style={{ color: '#0c0d0e', margin: 0, cursor: 'pointer', fontFamily: 'sans-serif', fontSize: '1.3rem' }}
           >
@@ -170,18 +171,17 @@ export default function GlobalLayout() {
               {/* CÁI CHUÔNG ĐÂY RỒI! */}
               <Popover content={notificationContent} trigger="click" placement="bottomRight" arrow={{ pointAtCenter: true }}>
                 <Badge count={unreadCount} size="small" offset={[-2, 4]} style={{ backgroundColor: '#f48225' }}>
-                  <Button 
-                    type="text" 
-                    icon={<BellOutlined style={{ fontSize: '1.2rem', color: '#525960' }} />} 
-                    style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '4px' }} 
-                  />
+                  <Button
+                    type="text"
+                    icon={<BellOutlined style={{ fontSize: '1.2rem', color: '#525960' }} />}
+                    style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '4px' }} />
                 </Badge>
               </Popover>
 
               <Typography.Text style={{ color: '#232629', fontSize: '0.85rem' }}>
                 {user.fullName || 'Người dùng'} (<span style={{ color: '#0074cc', fontWeight: 'bold' }}>{user.role}</span>)
               </Typography.Text>
-              
+
               <Button
                 size="small"
                 style={{ backgroundColor: '#f48225', color: '#fff', border: 'none', borderRadius: '3px', fontSize: '0.8rem' }}
@@ -189,7 +189,7 @@ export default function GlobalLayout() {
                   storage.clearToken();
                   storage.clearUser();
                   window.location.href = '/login'; // Ép tải lại trang để xóa sạch cache
-                }}
+                } }
               >
                 Đăng xuất
               </Button>
@@ -221,14 +221,17 @@ export default function GlobalLayout() {
             mode="inline"
             selectedKeys={[selectedKey]}
             items={sidebarItems}
-            style={{ background: 'transparent', borderRight: 'none' }}
-          />
+            style={{ background: 'transparent', borderRight: 'none' }} />
         </Sider>
 
         <Content style={{ padding: '24px', backgroundColor: '#ffffff', minHeight: 'calc(100vh - 50px)', flex: 1 }}>
           <Outlet /> {/* Nơi các trang con như /ask, /questions sẽ hiển thị */}
         </Content>
       </Layout>
-    </Layout>
+    </Layout><ConfigProvider locale={viVN}>
+        <Layout style={{ minHeight: '100vh', backgroundColor: '#f8f9fa' }}>
+          {/* ... Toàn bộ Header, Sider, Content của bạn giữ nguyên bên trong này ... */}
+        </Layout>
+      </ConfigProvider></>
   );
 }
