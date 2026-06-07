@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Card, Col, Row, Statistic, Spin, message } from "antd";
+import { Card, Col, Row, Statistic, Spin, message, Typography } from "antd";
 import {
   UserOutlined,
   FileTextOutlined,
@@ -24,7 +24,7 @@ const AdminDashboard: React.FC = () => {
     const fetchStats = async () => {
       try {
         setLoading(true);
-       
+
         const response = await api.get("/admin/stats");
         setStats(response.data);
       } catch (error) {
@@ -38,30 +38,44 @@ const AdminDashboard: React.FC = () => {
     fetchStats();
   }, []);
 
-
   if (loading) {
     return (
-      <Spin size="large" style={{ display: "block", margin: "100px auto" }} />
+      <div
+        className="ub-container"
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          minHeight: "50vh",
+        }}
+      >
+        <Spin size="large" />
+      </div>
     );
   }
 
   return (
-    <div
-      style={{
-        padding: "24px",
-        backgroundColor: "#f0f2f5",
-        minHeight: "100vh",
-      }}
-    >
-      <h2 style={{ marginBottom: "24px" }}>Bảng thống kê</h2>
-      <Row gutter={[16, 16]}>
+    <div className="ub-container">
+      {/* Tiêu đề được cập nhật lại theo định dạng Typography của Ant Design, đồng bộ với các trang Admin khác */}
+      <div
+        style={{
+          width: "100%",
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          marginBottom: 24,
+        }}
+      >
+        <Typography.Title level={3} style={{ margin: 0 }}>
+          Bảng thống kê
+        </Typography.Title>
+      </div>
+      <Row gutter={[24, 24]}>
         <Col xs={24} sm={12} md={6}>
           <Card
-            bordered={false}
-            style={{
-              borderRadius: "8px",
-              boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
-            }}
+            className="ub-card"
+            bordered
+            style={{ border: "1px solid #d9d9d9" }}
           >
             <Statistic
               title={
@@ -82,11 +96,9 @@ const AdminDashboard: React.FC = () => {
 
         <Col xs={24} sm={12} md={6}>
           <Card
-            bordered={false}
-            style={{
-              borderRadius: "8px",
-              boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
-            }}
+            className="ub-card"
+            bordered
+            style={{ border: "1px solid #d9d9d9" }}
           >
             <Statistic
               title={
@@ -107,11 +119,9 @@ const AdminDashboard: React.FC = () => {
 
         <Col xs={24} sm={12} md={6}>
           <Card
-            bordered={false}
-            style={{
-              borderRadius: "8px",
-              boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
-            }}
+            className="ub-card"
+            bordered
+            style={{ border: "1px solid #d9d9d9" }}
           >
             <Statistic
               title={
@@ -132,11 +142,9 @@ const AdminDashboard: React.FC = () => {
 
         <Col xs={24} sm={12} md={6}>
           <Card
-            bordered={false}
-            style={{
-              borderRadius: "8px",
-              boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
-            }}
+            className="ub-card"
+            bordered
+            style={{ border: "1px solid #d9d9d9" }}
           >
             <Statistic
               title={
