@@ -5,14 +5,15 @@
 [build.environment]
   NODE_VERSION = "18"
 
-# SPA fallback — redirect mọi URL về index.html
+# Proxy API sang Railway — PHẢI đặt TRƯỚC rule /* 
 [[redirects]]
-  from = "/*"
-  to = "/index.html"
-  status = 200
-[[redirects]]
-  # Proxy toàn bộ API sang Backend thực tế trên Railway
   from = "/api/*"
   to = "https://test-production-6aac.up.railway.app/api/:splat"
   status = 200
   force = true
+
+# SPA fallback — redirect mọi URL còn lại về index.html
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
