@@ -1,5 +1,5 @@
-const TOKEN_KEY = 'qa_token';
-const USER_KEY = 'qa_user';
+const TOKEN_KEY = "qa_token";
+const USER_KEY = "qa_user";
 
 export const storage = {
   getToken(): string | null {
