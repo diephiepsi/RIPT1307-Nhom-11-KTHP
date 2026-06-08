@@ -19,7 +19,7 @@ app.use(helmet());
 
 const allowedOrigins = [
   process.env.FRONTEND_URL,                          // Netlify production (từ env)
-  'https://ript1307-nhom11.netlify.app',             // Netlify custom name
+  // 'https://ript1307-nhom11.netlify.app',             // Netlify custom name
   'https://sweet-cuchufli-7b6f0e.netlify.app',       // Netlify random name
   'http://localhost:8000',                            // UMI dev server
   'http://localhost:3000',
