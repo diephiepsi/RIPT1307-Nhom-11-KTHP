@@ -10,3 +10,9 @@
   from = "/*"
   to = "/index.html"
   status = 200
+[[redirects]]
+  # Proxy toàn bộ API sang Backend thực tế trên Railway
+  from = "/api/*"
+  to = "https://test-production-6aac.up.railway.app/api/:splat"
+  status = 200
+  force = true
