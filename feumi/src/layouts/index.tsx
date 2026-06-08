@@ -8,9 +8,9 @@ import {
   List,
   Avatar,
   Button,
-  ConfigProvider, // <-- Thêm ConfigProvider
+  ConfigProvider, 
 } from "antd";
-import viVN from "antd/locale/vi_VN"; // <-- Thêm gói Tiếng Việt
+import viVN from "antd/locale/vi_VN"; 
 import {
   BellOutlined,
   HomeOutlined,
@@ -24,7 +24,7 @@ import { useState, useEffect } from "react";
 import { api } from "../services/api";
 import { storage } from "../services/storage";
 
-const { Header, Content, Sider, Footer } = Layout; // <-- Khai báo thêm Footer
+const { Header, Content, Sider, Footer } = Layout;
 
 interface NotificationItem {
   id: string;

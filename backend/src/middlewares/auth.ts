@@ -10,7 +10,7 @@ export function authOptional(req: Request, _res: Response, next: NextFunction) {
     const payload = jwt.verify(token, process.env.JWT_SECRET ?? '') as JwtUser;
     req.user = payload;
   } catch {
-    // ignore invalid token for optional auth
+    
   }
   next();
 }

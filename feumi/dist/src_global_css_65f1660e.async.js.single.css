@@ -1,0 +1,25 @@
+/* [project]/src/global.css [client] (css) */
+html, body, #root {
+  min-height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: #f5f6fa;
+  font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif;
+}
+
+.ant-layout {
+  background: none;
+}
+
+a {
+  color: inherit;
+}
+
+button {
+  font-family: inherit;
+}
+
+/*# sourceMappingURL=src_global_css_65f1660e.async.js.single.css.map*/

@@ -1,0 +1,6 @@
+{
+  "version": 3,
+  "sources": [],
+  "sections": [
+    {"offset": {"line": 4, "column": 0}, "map": {"version":3,"sources":["file:///C:/Users/hongt/OneDrive/M%C3%A1y%20t%C3%ADnh/BTLWEB/feumi/src/pages/index.tsx"],"sourcesContent":["import { useEffect } from 'react';\r\nimport { history } from 'umi';\r\n\r\nexport default function IndexPage() {\r\n  useEffect(() => {\r\n    history.replace('/questions');\r\n  }, []);\r\n\r\n  return null;\r\n}\r\n"],"names":["IndexPage","replace"],"mappings":";;;;AAAA;AACA;;;;AAEe,SAASA;;IACtB,IAAA,uIAAS,EAAC;QACR,8HAAO,CAACC,OAAO,CAAC;IAClB,GAAG,EAAE;IAEL,OAAO;AACT;GANwBD;KAAAA"}}]
+}
