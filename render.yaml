@@ -1,0 +1,9 @@
+services:
+  - type: web
+    name: ript1307-backend
+    env: node
+    rootDir: backend
+    buildCommand: yarn install && yarn build
+    preDeployCommand: npx prisma generate && npx prisma db push
+    startCommand: yarn start
+    autoDeploy: true
