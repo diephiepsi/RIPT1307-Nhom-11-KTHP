@@ -46,7 +46,7 @@ Backend chạy ở `http://localhost:3000/api`.
 
 > **Lưu ý:** Dự án backend dùng **Express + Prisma**, không phải NestJS. Bảng câu hỏi trong MySQL tên `posts` (map với model `Question` trong Prisma).
 
-### 3) Frontend
+### 3) Feumi
 
 Tạo file `.env` từ `.env.example`:
 
@@ -54,11 +54,13 @@ Tạo file `.env` từ `.env.example`:
 
 Sau đó:
 
-```bash
-cd frontend
+```bashyar
+cd 
 yarn
 yarn dev
 ```
+yarn add recharts
+
 
 Frontend chạy ở `http://localhost:5173`.
 
