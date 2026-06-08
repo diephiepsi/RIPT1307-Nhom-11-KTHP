@@ -1,14 +1,14 @@
 import axios from "axios";
 import { storage } from "./storage";
 
-const clientBase =
+const API_BASE_URL =
   process.env.API_BASE_URL ||
   process.env.VITE_API_BASE_URL ||
   process.env.UMI_APP_API_URL ||
   "https://ript1307-backend.onrender.com/api";
 
 export const api = axios.create({
-  baseURL: clientBase,
+  baseURL: API_BASE_URL,
   timeout: 15000,
 });
 

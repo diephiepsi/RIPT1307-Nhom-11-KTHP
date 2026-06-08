@@ -1,6 +1,0 @@
-{
-  "version": 3,
-  "sources": [],
-  "sections": [
-    {"offset": {"line": 4, "column": 0}, "map": {"version":3,"sources":["file:///C:/Users/hongt/OneDrive/M%C3%A1y%20t%C3%ADnh/BTLWEB/feumi/src/pages/docs.tsx"],"sourcesContent":["const DocsPage = () => {\r\n  return (\r\n    <div>\r\n      <p>This is umi docs.</p>\r\n    </div>\r\n  );\r\n};\r\n\r\nexport default DocsPage;\r\n"],"names":["DocsPage"],"mappings":";;;;;;AAAA,MAAMA,WAAW;IACf,qBACE,0JAAC;kBACC,cAAA,0JAAC;sBAAE;;;;;;;;;;;AAGT;KANMA;qCAQSA"}}]
-}
